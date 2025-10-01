@@ -34,31 +34,42 @@ passport.use(
     },
     async (email, password, done) => {
       try {
+        console.log('[Auth] Login attempt for email:', email);
         const credentials = loadAdminCredentials();
         const adminCreds = credentials.admin;
 
         if (!adminCreds || adminCreds.email !== email) {
+          console.log('[Auth] Email not found or no admin credentials');
           return done(null, false, { message: "Invalid credentials" });
         }
 
+        console.log('[Auth] Verifying password...');
         const isValidPassword = await bcrypt.compare(password, adminCreds.password);
         if (!isValidPassword) {
+          console.log('[Auth] Password verification failed');
           return done(null, false, { message: "Invalid credentials" });
         }
 
+        console.log('[Auth] Password verified, checking database for user...');
         // Get or create user in database
         let user = await storage.getUser(adminCreds.id);
         if (!user) {
+          console.log('[Auth] User not found, creating new user...');
           user = await storage.upsertUser({
             id: adminCreds.id,
             email: adminCreds.email,
             firstName: adminCreds.username,
             role: adminCreds.role,
           });
+          console.log('[Auth] User created successfully');
+        } else {
+          console.log('[Auth] User found in database');
         }
 
+        console.log('[Auth] Login successful for user:', user.id);
         return done(null, user);
       } catch (error) {
+        console.error('[Auth] ERROR during authentication:', error);
         return done(error);
       }
     }
