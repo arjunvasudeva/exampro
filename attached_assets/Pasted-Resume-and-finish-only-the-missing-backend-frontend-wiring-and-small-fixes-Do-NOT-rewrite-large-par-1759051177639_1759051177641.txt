@@ -1,0 +1,31 @@
+Resume and finish only the missing backend/frontend wiring and small fixes. Do NOT rewrite large parts of the app.
+
+1) Fix exam-questions load reliability:
+- Investigate POST /api/exam-sessions and GET /api/exam-sessions/:id/questions.
+- Fix cause of intermittent "Loading exam questions…" (either session created without questionIds or frontend parsing error).
+- Ensure storage.getRandomQuestions() returns correct questions when admin has created questions (match examName).
+- Add clear error handling: if NO_QUESTIONS, show admin-friendly message on admin panel and student-friendly message on student page.
+
+2) Admin endpoints needed:
+- Add PATCH /api/hall-tickets/:id/move-to-draft to mark a ticket as draft (do not delete).
+- Add GET /api/hall-tickets?bin=draft (or /api/hall-tickets/draft) to list draft tickets.
+
+3) Admin results page & routes:
+- Ensure frontend route /admin/results exists and links in admin UI.
+- Create a minimal /admin/results page that calls GET /api/exam-sessions/:id (admin auth) and displays results (student name, hallTicketId, answers, score, status).
+
+4) Fix admin button errors:
+- Fix frontend calls for Delete Hall Ticket, Flag Student, Resolve — ensure they use the correct API endpoints and include auth token.
+- Make server responses consistent (400/500 payloads) for the UI to show friendly messages.
+
+5) Live monitoring & camera:
+- Debug why student camera shows black on admin monitor: ensure student client sends video or snapshots via WebSocket or REST; ensure admin subscribes to those events.
+- If needed, implement a simple fallback where students send periodic snapshots to `POST /api/monitoring-logs` and admin UI polls/receives those.
+
+Important: after making code changes, run the app locally in Replit preview and verify the following in this order (commit after each success):
+1) Admin creates questions for exam X via /admin/questions.
+2) Admin creates hall ticket for exam X and student uses it.
+3) Start exam — questions load without “Loading…”.
+4) Submit exam — results viewable in /admin/results and hall ticket moves to Draft Bin.
+
+Do only the above items. Do not change anything else.
